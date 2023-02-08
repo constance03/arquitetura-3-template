@@ -1,16 +1,23 @@
 import { Request, Response } from "express"
 import { ProductBusiness } from "../business/ProductBusiness"
+import { ProductDTO } from "../dtos/ProductDTO"
 import { BaseError } from "../errors/BaseError"
 
 export class ProductController {
+
+    constructor (
+        private productDTO: ProductDTO,
+        private productBusiness: ProductBusiness
+        ) {}
+
     public getProducts = async (req: Request, res: Response) => {
         try {
             const input = {
                 q: req.query.q
             }
 
-            const productBusiness = new ProductBusiness()
-            const output = await productBusiness.getProducts(input)
+            // const productBusiness = new ProductBusiness()
+            const output = await this.productBusiness.getProducts(input)
 
             res.status(200).send(output)
         } catch (error) {
@@ -27,14 +34,19 @@ export class ProductController {
     public createProduct = async (req: Request, res: Response) => {
         try {
 
-            const input = {
-                id: req.body.id,
-                name: req.body.name,
-                price: req.body.price
-            }
+            // const input = {
+            //     id: req.body.id,
+            //     name: req.body.name,
+            //     price: req.body.price
+            // }
 
-            const productBusiness = new ProductBusiness()
-            const output = await productBusiness.createProduct(input)
+            //instanciar DTO
+            // const productDTO = new ProductDTO() (ta no router)
+            const input = this.productDTO.createProductInputDTO(req.body.id, req.body.name, req.body.price)
+
+            //instanciar business
+            // const productBusiness = new ProductBusiness()
+            const output = await this.productBusiness.createProduct(input)
 
             res.status(201).send(output)
         } catch (error) {
@@ -50,19 +62,10 @@ export class ProductController {
 
     public editProduct = async (req: Request, res: Response) => {
         try {
-
-            const input = {
-                idToEdit: req.params.id,
-                newId: req.body.id,
-                newName: req.body.name,
-                newPrice: req.body.price,
-                newCreatedAt: req.body.createdAt
-            }
-
-            const productBusiness = new ProductBusiness()
-            const output = await productBusiness.editProduct(input)
-
+            const input = this.productDTO.editProductInputDTO(req.params.id, req.body.id, req.body.name, req.body.price, req.body.createdAt)
+            const output = await this.productBusiness.editProduct(input)
             res.status(200).send(output)
+
         } catch (error) {
             console.log(error)
 
@@ -81,8 +84,8 @@ export class ProductController {
                 idToDelete: req.params.id
             }
 
-            const productBusiness = new ProductBusiness()
-            const output = await productBusiness.deleteProduct(input)
+            // const productBusiness = new ProductBusiness()
+            const output = await this.productBusiness.deleteProduct(input)
 
             res.status(200).send(output)
         } catch (error) {
